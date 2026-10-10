@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PicYourBeat — Hear the details</title>
+  <link rel="stylesheet" href="style.css?v=4">
+  <script src="app.js?v=4" defer></script>
+</head>
+<body>
+  <header><a class="brand" href="./">PicYourBeat<span>✦</span></a><span class="tag">ART → INTERPRETATION → MUSIC</span></header>
+  <main>
+    <section class="intro"><p class="eyebrow">PICK A DETAIL. FIND ITS BEAT.</p><h1>Hear the <em>details.</em></h1><p>One image. Many interpretations. Choose the detail you want to turn into music.</p></section>
+    <div class="workspace">
+      <section class="panel art-panel" aria-labelledby="image-heading">
+        <div class="panel-heading"><h2 id="image-heading"><span class="step">01</span> Choose your image</h2><label class="upload">Upload image<input id="file" type="file" accept="image/jpeg,image/png"></label></div>
+        <div id="empty"><span class="empty-icon">▧</span><h3>Start with a photograph or artwork</h3><p>JPG or PNG · up to 10 MB<br>Only your selected detail is sent to Google when you interpret it.</p><button id="example" class="secondary">Try an example artwork</button></div>
+        <canvas id="source" hidden aria-label="Image selection canvas. Drag to choose a detail, or use the accessible selection controls below."></canvas>
+        <div id="controls" hidden>
+          <p class="hint">Drag a rectangle over a detail, or use these controls.</p>
+          <div class="modes"><button id="whole" class="secondary">Whole image</button><button id="left" class="secondary">Left half</button><button id="right" class="secondary">Right half</button></div>
+          <details><summary>Adjust selection with keyboard</summary><div class="ranges">
+            <label>Left <input id="x" type="range" min="0" max="99" value="0"></label>
+            <label>Top <input id="y" type="range" min="0" max="99" value="0"></label>
+            <label>Width <input id="w" type="range" min="1" max="100" value="100"></label>
+            <label>Height <input id="h" type="range" min="1" max="100" value="100"></label>
+          </div></details>
+        </div>
+      </section>
+      <section class="panel result-panel" aria-labelledby="detail-heading">
+        <h2 id="detail-heading"><span class="step">02</span> Your selected detail</h2>
+        <div id="crop-empty">Your selection will appear here.</div><canvas id="crop" hidden aria-label="Preview of selected image region"></canvas>
+        <p id="selection-label" class="hint">Upload an image to begin.</p>
+        <label class="field" for="intent">What do you notice? <span>Optional</span></label><textarea id="intent" rows="3" placeholder="The small figure feels peaceful beneath the dramatic sky…" maxlength="500"></textarea>
+        <div class="next"><h3>Give this detail a sound</h3><p>Interpret with Gemini, edit its musical direction, then compose with ElevenLabs.</p><button id="interpret" disabled>Interpret this detail</button><p id="connection" class="hint">Checking API connection…</p>
+<div id="interpretation" hidden><h3 id="music-title"></h3><p id="explanation"></p><label class="field" for="prompt">Your musical direction · editable</label><textarea id="prompt" rows="5" maxlength="1800"></textarea><button id="compose">Compose 10-second music</button><p class="hint">Uses your existing ElevenLabs credits. No automatic credit purchases.</p></div></div>
+        <div id="loading" class="loading" hidden>
+          <div class="loading-heading"><strong id="loading-title"></strong><span id="loading-time" aria-hidden="true">0s elapsed</span></div>
+          <progress id="loading-bar" max="1" aria-label="Request in progress"></progress>
+          <p id="loading-note" class="hint"></p>
+        </div>
+      </section>
+    </div>
+    <p id="status" role="status" aria-live="polite"></p><section id="results" hidden><h2>Listen to your details</h2><p class="hint">Compare two interpretations. Changing the direction creates a new clip.</p><div id="clips"></div></section>
+  </main>
+  <footer>Made for visual creators. Music is an artistic interpretation, not an exact translation.</footer>
+</body>
+</html>

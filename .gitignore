@@ -1,0 +1,8 @@
+.env
+.env.*
+!.env.example
+node_modules/
+.DS_Store
+*.mp3
+*-preview.jpg
+connected-preview.jpg
