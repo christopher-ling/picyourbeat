@@ -1,48 +1,42 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PicYourBeat — Hear the details</title>
-  <link rel="stylesheet" href="style.css?v=4">
-  <script src="app.js?v=4" defer></script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PicYourBeat — Hear the details</title>
+<link rel="stylesheet" href="style.css?v=5"><script src="app.js?v=5" defer></script>
 </head>
 <body>
-  <header><a class="brand" href="./">PicYourBeat<span>✦</span></a><span class="tag">ART → INTERPRETATION → MUSIC</span></header>
-  <main>
-    <section class="intro"><p class="eyebrow">PICK A DETAIL. FIND ITS BEAT.</p><h1>Hear the <em>details.</em></h1><p>One image. Many interpretations. Choose the detail you want to turn into music.</p></section>
-    <div class="workspace">
-      <section class="panel art-panel" aria-labelledby="image-heading">
-        <div class="panel-heading"><h2 id="image-heading"><span class="step">01</span> Choose your image</h2><label class="upload">Upload image<input id="file" type="file" accept="image/jpeg,image/png"></label></div>
-        <div id="empty"><span class="empty-icon">▧</span><h3>Start with a photograph or artwork</h3><p>JPG or PNG · up to 10 MB<br>Only your selected detail is sent to Google when you interpret it.</p><button id="example" class="secondary">Try an example artwork</button></div>
-        <canvas id="source" hidden aria-label="Image selection canvas. Drag to choose a detail, or use the accessible selection controls below."></canvas>
-        <div id="controls" hidden>
-          <p class="hint">Drag a rectangle over a detail, or use these controls.</p>
-          <div class="modes"><button id="whole" class="secondary">Whole image</button><button id="left" class="secondary">Left half</button><button id="right" class="secondary">Right half</button></div>
-          <details><summary>Adjust selection with keyboard</summary><div class="ranges">
-            <label>Left <input id="x" type="range" min="0" max="99" value="0"></label>
-            <label>Top <input id="y" type="range" min="0" max="99" value="0"></label>
-            <label>Width <input id="w" type="range" min="1" max="100" value="100"></label>
-            <label>Height <input id="h" type="range" min="1" max="100" value="100"></label>
-          </div></details>
-        </div>
-      </section>
-      <section class="panel result-panel" aria-labelledby="detail-heading">
-        <h2 id="detail-heading"><span class="step">02</span> Your selected detail</h2>
-        <div id="crop-empty">Your selection will appear here.</div><canvas id="crop" hidden aria-label="Preview of selected image region"></canvas>
-        <p id="selection-label" class="hint">Upload an image to begin.</p>
-        <label class="field" for="intent">What do you notice? <span>Optional</span></label><textarea id="intent" rows="3" placeholder="The small figure feels peaceful beneath the dramatic sky…" maxlength="500"></textarea>
-        <div class="next"><h3>Give this detail a sound</h3><p>Interpret with Gemini, edit its musical direction, then compose with ElevenLabs.</p><button id="interpret" disabled>Interpret this detail</button><p id="connection" class="hint">Checking API connection…</p>
-<div id="interpretation" hidden><h3 id="music-title"></h3><p id="explanation"></p><label class="field" for="prompt">Your musical direction · editable</label><textarea id="prompt" rows="5" maxlength="1800"></textarea><button id="compose">Compose 10-second music</button><p class="hint">Uses your existing ElevenLabs credits. No automatic credit purchases.</p></div></div>
-        <div id="loading" class="loading" hidden>
-          <div class="loading-heading"><strong id="loading-title"></strong><span id="loading-time" aria-hidden="true">0s elapsed</span></div>
-          <progress id="loading-bar" max="1" aria-label="Request in progress"></progress>
-          <p id="loading-note" class="hint"></p>
-        </div>
-      </section>
-    </div>
-    <p id="status" role="status" aria-live="polite"></p><section id="results" hidden><h2>Listen to your details</h2><p class="hint">Compare two interpretations. Changing the direction creates a new clip.</p><div id="clips"></div></section>
-  </main>
-  <footer>Made for visual creators. Music is an artistic interpretation, not an exact translation.</footer>
-</body>
-</html>
+<header><a class="brand" href="./">PicYourBeat<span>✦</span></a><nav aria-label="Main"><button id="create-nav" class="nav-button" aria-current="page">Create</button><button id="library-nav" class="nav-button">My music <span id="library-count">0</span></button></nav></header>
+<main>
+<div id="create-view">
+<section class="intro"><p class="eyebrow">PICK A DETAIL. FIND ITS BEAT.</p><h1>Hear the <em>details.</em></h1><p>Take an image from a visual moment to a musical one.</p></section>
+<ol class="steps" aria-label="Creation steps"><li data-step="1" aria-current="step"><span>1</span> Image</li><li data-step="2"><span>2</span> Detail</li><li data-step="3"><span>3</span> Sound</li><li data-step="4"><span>4</span> Listen</li></ol>
+<div class="workspace">
+<section id="step-1" class="panel wizard-step" aria-labelledby="image-heading">
+<p class="eyebrow">STEP 1 OF 4</p><h2 id="image-heading" tabindex="-1">Choose your image</h2><p class="hint">Start with a photograph or artwork. Where will it take you?</p>
+<div id="empty"><span class="empty-icon">▧</span><h3>A picture is the starting point.</h3><p>JPG or PNG · up to 10 MB</p><label class="upload">Upload image<input id="file" type="file" accept="image/jpeg,image/png"></label><button id="example" class="secondary">Try an example artwork</button></div>
+<p class="hint">Only your selected detail is sent to Google when you interpret it.</p>
+<button id="continue-image" hidden>Continue with this image</button>
+</section>
+<section id="step-2" class="panel wizard-step" hidden aria-labelledby="detail-heading">
+<p class="eyebrow">STEP 2 OF 4</p><h2 id="detail-heading" tabindex="-1">Pick what gets heard.</h2><canvas id="source" hidden aria-label="Image selection canvas. Drag to choose a detail, or use the accessible selection controls below."></canvas>
+<div id="controls" hidden><p class="hint">Drag over a detail, or use a preset.</p><div class="modes"><button id="whole" class="secondary">Whole image</button><button id="left" class="secondary">Left half</button><button id="right" class="secondary">Right half</button></div>
+<details><summary>Adjust selection with keyboard</summary><div class="ranges"><label>Left<input id="x" type="range" min="0" max="99" value="0"></label><label>Top<input id="y" type="range" min="0" max="99" value="0"></label><label>Width<input id="w" type="range" min="1" max="100" value="100"></label><label>Height<input id="h" type="range" min="1" max="100" value="100"></label></div></details></div>
+<div class="crop-preview"><div id="crop-empty">Your selection will appear here.</div><canvas id="crop" hidden aria-label="Preview of selected image region"></canvas><p id="selection-label" class="hint">Upload an image to begin.</p></div>
+<label class="field" for="intent">What do you notice? <span>Optional</span></label><textarea id="intent" rows="2" placeholder="The small figure feels peaceful beneath the dramatic sky…" maxlength="500"></textarea>
+<div class="actions"><button id="back-image" class="secondary">Back</button><button id="interpret" disabled>Interpret this detail</button></div>
+</section>
+<section id="step-3" class="panel wizard-step" hidden aria-labelledby="sound-heading">
+<p class="eyebrow">STEP 3 OF 4</p><h2 id="sound-heading" tabindex="-1">Shape your sound.</h2><div id="interpretation" hidden><img id="sound-thumb" class="detail-thumb" alt="Selected image detail"><h3 id="music-title"></h3><p id="explanation"></p><label class="field" for="prompt">Your musical direction · editable</label><textarea id="prompt" rows="6" maxlength="1800"></textarea><p class="hint">Compose a 10-second instrumental preview using your existing ElevenLabs credits.</p></div>
+<div class="actions"><button id="back-detail" class="secondary">Back</button><button id="compose">Compose 10-second music</button></div>
+</section>
+<section id="step-4" class="panel wizard-step" hidden aria-labelledby="listen-heading">
+<p class="eyebrow">STEP 4 OF 4</p><h2 id="listen-heading" tabindex="-1">Meet your new beat.</h2><section id="results" hidden><p class="hint">Your two latest interpretations. Every new clip also appears in My music.</p><div id="clips"></div></section><div class="actions"><button id="another-detail" class="secondary">Try another detail</button><button id="open-library">My music</button></div><button id="new-image" class="text-button">Start with another image</button>
+</section>
+<div id="loading" class="loading" hidden><div class="loading-heading"><strong id="loading-title"></strong><span id="loading-time" aria-hidden="true">0s elapsed</span></div><progress id="loading-bar" max="1" aria-label="Request in progress"></progress><p id="loading-note" class="hint"></p></div>
+</div><p id="connection" class="hint connection">Checking API connection…</p>
+</div>
+<section id="library-view" hidden><div class="intro"><p class="eyebrow">YOUR LITTLE RECORD COLLECTION</p><h1>My <em>music.</em></h1><p>Revisit your details. Play a favorite. Download it again.</p></div><p class="library-info hint">Saved in this browser on this device. This library doesn’t read your Downloads folder. Clearing browser data removes these copies; keep downloaded MP3s for a backup.</p><div id="library-empty" class="panel"><h2>No beats here yet.</h2><p>Create your first clip and it will appear here.</p><button id="library-create">Create a beat</button></div><div id="library-clips"></div></section>
+<p id="status" role="status" aria-live="polite"></p>
+</main><footer>Music is an artistic interpretation, not an exact translation.</footer>
+</body></html>

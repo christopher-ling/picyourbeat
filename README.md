@@ -27,11 +27,13 @@ Open http://127.0.0.1:5173. Do not use the former Python static preview server: 
 - Edit the musical direction before composing.
 - ElevenLabs Music generates a ten-second instrumental clip using configured account credits.
 - Browser playback, MP3 downloads, and comparison of two results.
+- A narrow, four-step creation flow: Image → Detail → Sound → Listen, with back navigation and a separate My music screen.
+- Generated clips are saved locally in IndexedDB with audio, crop, title, and direction. My music supports playback and repeat downloads after refresh. Storage is specific to this browser and site address; clearing browser data removes local copies. It does not read the user's Downloads folder. If storage fails, download the clip before refreshing.
 - Animated loading bar for both API steps, elapsed seconds, completion confirmation, and a stopped error state. The bar is indeterminate while waiting because providers do not report completion percentages. Reduced-motion preferences are respected.
 
 ## Architecture and privacy
 
-The browser draws and crops the image. Interpret sends the selected crop and optional observation to Google. Compose sends the editable musical direction to ElevenLabs. Credentials remain on the server. Images and returned audio are processed in memory; the app has no database or server-side upload archive. Providers have their own data handling policies. Google free-tier processing must not be described as zero-data processing.
+The browser draws and crops the image. Interpret sends the selected crop and optional observation to Google. Compose sends the editable musical direction to ElevenLabs. Credentials remain on the server. The server processes uploads and audio in memory without an upload archive. The browser stores generated audio and crop thumbnails locally in IndexedDB for My music. Providers have their own data handling policies. Google free-tier processing must not be described as zero-data processing.
 
 An original example artwork is generated with browser canvas code. Google Fonts is optional and has system font fallbacks.
 

@@ -5,6 +5,45 @@ const ctx = source.getContext('2d'), cropCtx = crop.getContext('2d');
 let image = null, selection = null, start = null, uploadVersion = 0;
 let connected = false, musicConnected = false, busy = false, interpretationSnapshot = null;
 const savedClips = [];
+let currentStep=1, libraryDb=null;
+function showStep(step) {
+  currentStep=step;
+  for(let i=1;i<=4;i++) {$('step-'+i).hidden=i!==step;const item=document.querySelector(`[data-step="${i}"]`);item.classList.toggle('done',i<step);if(i===step)item.setAttribute('aria-current','step');else item.removeAttribute('aria-current');}
+  $('create-view').hidden=false;$('library-view').hidden=true;
+  $('create-nav').setAttribute('aria-current','page');$('library-nav').removeAttribute('aria-current');
+  $('step-'+step).querySelector('h2').focus();
+}
+function showLibrary() {
+  if(busy)return;
+  showClips();$('create-view').hidden=true;$('library-view').hidden=false;
+  $('library-nav').setAttribute('aria-current','page');$('create-nav').removeAttribute('aria-current');
+  announce(savedClips.length?`${savedClips.length} ${savedClips.length===1?'clip':'clips'} in your music library.`:'Create a clip to start your music library.');
+}
+$('create-nav').onclick=()=>{if(!busy)showStep(currentStep);};
+for(const id of ['library-nav','open-library'])$(id).onclick=showLibrary;
+$('library-create').onclick=()=>showStep(image?2:1);
+$('back-image').onclick=()=>showStep(1);
+$('continue-image').onclick=()=>showStep(2);
+$('back-detail').onclick=()=>{$('loading').hidden=true;showStep(2);};
+$('another-detail').onclick=()=>{$('loading').hidden=true;showStep(2);};
+$('new-image').onclick=()=>{$('loading').hidden=true;showStep(1);};
+function storeClip(clip) {
+  return new Promise((resolve,reject)=>{
+    if(!libraryDb)return reject(new Error('Browser storage unavailable'));
+    const transaction=libraryDb.transaction('clips','readwrite');
+    const {url,...record}=clip;transaction.objectStore('clips').put(record);
+    transaction.oncomplete=resolve;transaction.onerror=()=>reject(transaction.error);transaction.onabort=()=>reject(transaction.error);
+  });
+}
+const libraryReady=new Promise(resolve=>{
+  try {
+    const request=indexedDB.open('picyourbeat-library',1);
+    request.onupgradeneeded=()=>request.result.createObjectStore('clips',{keyPath:'id'});
+    request.onerror=()=>resolve(false);
+    request.onblocked=()=>resolve(false);
+    request.onsuccess=()=>{libraryDb=request.result;libraryDb.onversionchange=()=>libraryDb.close();const read=libraryDb.transaction('clips','readonly').objectStore('clips').getAll();read.onsuccess=()=>{for(const clip of read.result)if(clip.blob instanceof Blob)savedClips.push({...clip,url:URL.createObjectURL(clip.blob)});savedClips.sort((a,b)=>b.createdAt-a.createdAt);showClips();resolve(true);};read.onerror=()=>resolve(false);};
+  }catch{resolve(false);}
+});
 let loadingTimer=null, loadingStarted=0;
 function startLoading(kind) {
   clearInterval(loadingTimer);loadingStarted=performance.now();
@@ -25,7 +64,7 @@ function finishLoading(success,kind) {
   if(success) $('loading-bar').value=1;
   $('loading-bar').setAttribute('aria-label',success?'Request complete':'Request failed');
   $('loading-title').textContent=success?(kind==='interpret'?'Interpretation complete':'Music ready'):'Couldn’t finish this request';
-  $('loading-note').textContent=success?(kind==='interpret'?'Your musical direction is ready to edit.':'Your clip is ready to play and download below.'):'See the error message below. Your selection is still here.';
+  $('loading-note').textContent=success?(kind==='interpret'?'Your musical direction is ready to edit.':'Your clip is ready to play and download.'):'See the error message below. Your selection is still here.';
   $('interpret').textContent='Interpret this detail';$('compose').textContent='Compose 10-second music';
 }
 function announce(message) { $('status').textContent = message; }
@@ -33,8 +72,10 @@ function setImage(value) {
   image = value;
   source.width = Math.max(1,Math.round(value.width*Math.min(1,1200/Math.max(value.width,value.height))));
   source.height = Math.round(value.height * source.width / value.width);
-  $('empty').hidden = true; source.hidden = false; $('controls').hidden = false;
+  source.hidden = false; $('controls').hidden = false;
+  $('continue-image').hidden=false;
   choose(0, 0, source.width, source.height);
+  showStep(2);
 }
 function choose(x, y, w, h) {
   if (!image || busy) return;
@@ -71,7 +112,7 @@ function point(event) {
 }
 source.addEventListener('pointerdown', event => { if (!image || busy) return; start = point(event); source.setPointerCapture(event.pointerId); });
 source.addEventListener('pointermove', event => { if (!start) return; const end = point(event); if (Math.abs(end.x-start.x) < 4 || Math.abs(end.y-start.y) < 4) return; choose(Math.min(start.x,end.x), Math.min(start.y,end.y), Math.abs(end.x-start.x), Math.abs(end.y-start.y)); });
-source.addEventListener('pointerup', event => { if (!start) return; const end = point(event); if (Math.abs(end.x-start.x)>3 && Math.abs(end.y-start.y)>3) choose(Math.min(start.x,end.x),Math.min(start.y,end.y),Math.abs(end.x-start.x),Math.abs(end.y-start.y)); start=null; announce('Selection ready. Preview the detail on the right.'); });
+source.addEventListener('pointerup', event => { if (!start) return; const end = point(event); if (Math.abs(end.x-start.x)>3 && Math.abs(end.y-start.y)>3) choose(Math.min(start.x,end.x),Math.min(start.y,end.y),Math.abs(end.x-start.x),Math.abs(end.y-start.y)); start=null; announce('Selection ready. Your selected detail is shown below.'); });
 source.addEventListener('pointercancel', () => { start = null; });
 for (const id of ['x','y','w','h']) $(id).addEventListener('input', () => choose(Number($('x').value)/100*source.width,Number($('y').value)/100*source.height,Number($('w').value)/100*source.width,Number($('h').value)/100*source.height));
 $('whole').onclick = () => { start=null; choose(0,0,source.width,source.height); };
@@ -130,7 +171,7 @@ $('interpret').onclick=async()=>{
     const value=await response.json();
     $('music-title').textContent=value.title; $('explanation').textContent=value.explanation; $('prompt').value=value.musicPrompt;
     interpretationSnapshot={thumbnail,label,title:value.title,explanation:value.explanation};
-    $('interpretation').hidden=false;finishLoading(true,'interpret');announce('Interpretation ready. Edit the musical direction, then compose.');
+    $('sound-thumb').src=thumbnail;$('interpretation').hidden=false;finishLoading(true,'interpret');showStep(3);announce('Interpretation ready. Edit the musical direction, then compose.');
   }catch(error){finishLoading(false,'interpret');announce(error.message);}finally{setBusy(false);}
 };
 $('compose').onclick=async()=>{
@@ -141,23 +182,29 @@ $('compose').onclick=async()=>{
     const response=await fetch('/api/music',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:snapshot.prompt})});
     if(!response.ok)throw new Error(await apiError(response));
     loadingStage('Preparing your audio player…');
-    const blob=await response.blob();const url=URL.createObjectURL(blob);savedClips.unshift({...snapshot,url});
-    if(savedClips.length>2)URL.revokeObjectURL(savedClips.pop().url);
-    showClips();finishLoading(true,'music');announce('Music ready. Press Play to listen. Select a different detail to compare.');
+    const blob=await response.blob();await libraryReady;
+    const clip={...snapshot,blob,url:URL.createObjectURL(blob),id:crypto.randomUUID(),createdAt:Date.now()};savedClips.unshift(clip);
+    let persisted=true;try{await storeClip(clip);}catch{persisted=false;}
+    showClips();finishLoading(true,'music');showStep(4);announce(persisted?'Music ready and saved to My music. Play it or download your MP3.':'Music ready, but browser storage is unavailable or full. Download the MP3 now; this clip will not survive a refresh.');
   }catch(error){finishLoading(false,'music');announce(error.message);}finally{setBusy(false);}
 };
 function showClips(){
-  $('clips').replaceChildren();$('results').hidden=false;
-  for(const clip of savedClips){
+  $('clips').replaceChildren();$('library-clips').replaceChildren();$('results').hidden=!savedClips.length;
+  $('library-empty').hidden=!!savedClips.length;$('library-count').textContent=savedClips.length;
+  function cardFor(clip){
     const card=document.createElement('article');card.className='clip panel';
     const thumb=document.createElement('img');thumb.src=clip.thumbnail;thumb.alt=clip.label;
     const title=document.createElement('h3');title.textContent=clip.title;
     const explanation=document.createElement('p');explanation.textContent=clip.explanation;
     const audio=document.createElement('audio');audio.controls=true;audio.src=clip.url;audio.preload='metadata';
-    const download=document.createElement('a');download.href=clip.url;download.download='picyourbeat-'+Date.now()+'.mp3';download.textContent='Download music';download.className='download';
+    audio.addEventListener('play',()=>{for(const other of document.querySelectorAll('audio'))if(other!==audio)other.pause();});
+    const date=document.createElement('p');date.className='clip-date';date.textContent=new Date(clip.createdAt).toLocaleString();
+    const download=document.createElement('a');download.href=clip.url;download.download='picyourbeat-'+clip.createdAt+'.mp3';download.textContent='Download MP3';download.className='download';
     const details=document.createElement('details');const summary=document.createElement('summary');summary.textContent='Musical direction used';const prompt=document.createElement('p');prompt.textContent=clip.prompt;details.append(summary,prompt);
-    card.append(thumb,title,explanation,audio,download,details);$('clips').append(card);
+    card.append(thumb,title,date,explanation,audio,download,details);return card;
   }
+  for(const clip of savedClips.slice(0,2))$('clips').append(cardFor(clip));
+  for(const clip of savedClips)$('library-clips').append(cardFor(clip));
 }
 fetch('/api/health').then(r=>{if(!r.ok)throw new Error();return r.json();}).then(value=>{
   connected=value.interpretation;musicConnected=value.music;
